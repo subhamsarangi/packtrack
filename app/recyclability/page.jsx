@@ -1,5 +1,5 @@
 "use client";
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import { useCompliance } from "@/components/ComplianceContext";
 import { Card, CardTitle, Grade, Td, ProgressBar, Badge, Btn, InfoHelper } from "@/components/ui";
 import {
@@ -25,6 +25,16 @@ export default function Recyclability() {
 
   // Linkage drawer states
   const [tempParentId, setTempParentId] = useState("");
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowBulkModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const toggleRow = (id, currentParentId) => {
     if (expandedSkuId === id) {
