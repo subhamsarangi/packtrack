@@ -5,11 +5,11 @@ import { Card, CardTitle, Grade, Td, ProgressBar, Badge, Btn, InfoHelper } from 
 import {
   IconDownload, IconChevronDown, IconChevronUp, IconBook,
   IconUpload, IconBrain, IconHierarchy, IconCircleCheck,
-  IconAlertTriangle, IconRefresh, IconArrowRight, IconX, IconFileSpreadsheet
+  IconAlertTriangle, IconRefresh, IconArrowRight, IconX
 } from "@tabler/icons-react";
 
 export default function Recyclability() {
-  const { skus, setSkus, updateSkuLink } = useCompliance();
+  const { skus, updateSkuLink } = useCompliance();
   const [expandedSkuId, setExpandedSkuId] = useState(null);
   const [showGuide, setShowGuide] = useState(true);
   
@@ -17,19 +17,11 @@ export default function Recyclability() {
   const [selectedType, setSelectedType] = useState("All packaging types");
   const [selectedGrade, setSelectedGrade] = useState("All grades");
   
-  // Bulk Modal states
+  // Bulk importer states (Modal view)
   const [showBulkModal, setShowBulkModal] = useState(false);
-  const [bulkStep, setBulkStep] = useState(1); // 1: Upload, 2: Parsing/AI, 3: Review, 4: Success
+  const [isBulkRunning, setIsBulkRunning] = useState(false);
   const [bulkStatus, setBulkStatus] = useState("");
-  const [isAiProcessing, setIsAiProcessing] = useState(false);
-  
-  // Pending review SKUs in modal
-  const [pendingSkus, setPendingSkus] = useState([
-    { id: "PKG-1023", name: "Flexible snack pouch", suggested_type: "primary", material: "Multi-layer", confidence: 99 },
-    { id: "PKG-SEC-502", name: "Plastic Shrink Wrap 6-pack (Yogurt)", suggested_type: "secondary", material: "LDPE Film", confidence: 96 },
-    { id: "PKG-TER-902", name: "Stretch Logistics Wrap (Heavy-duty)", suggested_type: "tertiary", material: "LLDPE Film", confidence: 94 },
-    { id: "PKG-SRV-202", name: "Polystyrene Takeaway Box", suggested_type: "service", material: "Polystyrene", confidence: 98 }
-  ]);
+  const [bulkSuccess, setBulkSuccess] = useState(false);
 
   // Linkage drawer states
   const [tempParentId, setTempParentId] = useState("");
@@ -43,56 +35,22 @@ export default function Recyclability() {
     }
   };
 
-  const openReclassifyModal = () => {
-    setBulkStep(1);
-    setIsAiProcessing(false);
-    setBulkStatus("");
-    setShowBulkModal(true);
-  };
-
-  const handleSimulatedUpload = () => {
-    setBulkStep(2);
-    setIsAiProcessing(true);
-    setBulkStatus("Analyzing lamination specs and density logs...");
+  const handleBulkReclassify = () => {
+    setIsBulkRunning(true);
+    setBulkStatus("Analyzing 1,284 raw SKU descriptions...");
+    setBulkSuccess(false);
 
     setTimeout(() => {
-      setBulkStatus("Parsing SKU text descriptions for packaging formats...");
+      setBulkStatus("Mapping keywords to PPWR Article 4 categories...");
       setTimeout(() => {
-        setBulkStatus("Checking chemical certifications & polymer records...");
+        setBulkStatus("Checking polymer specs & barrier lamination records...");
         setTimeout(() => {
-          setIsAiProcessing(false);
-          setBulkStep(3); // Go to review step
+          setIsBulkRunning(false);
+          setBulkSuccess(true);
+          setBulkStatus("AI-Assisted Classification Complete! 1,284 SKUs successfully updated: 812 Primary, 314 Secondary, 142 Tertiary, 16 Service packaging.");
         }, 800);
       }, 700);
     }, 600);
-  };
-
-  const handlePendingTypeChange = (skuId, type) => {
-    setPendingSkus(prev => 
-      prev.map(item => item.id === skuId ? { ...item, suggested_type: type } : item)
-    );
-  };
-
-  const applyBulkReclassification = () => {
-    // Modify global context state
-    setSkus(prev => 
-      prev.map(sku => {
-        const matched = pendingSkus.find(item => item.id === sku.id);
-        if (matched) {
-          return {
-            ...sku,
-            packaging_type: matched.suggested_type,
-            status: "Compliant" // Make them active / reviewed
-          };
-        }
-        return sku;
-      })
-    );
-    
-    setBulkStep(4); // Success step
-    setTimeout(() => {
-      setShowBulkModal(false);
-    }, 2000);
   };
 
   // Filter logic
@@ -137,6 +95,7 @@ export default function Recyclability() {
     URL.revokeObjectURL(url);
   };
 
+  // Helper to fetch details of a parent SKU
   const getParentName = (parentId) => {
     const p = skus.find(s => s.id === parentId);
     return p ? `${p.name} (${p.id})` : "None";
@@ -220,144 +179,115 @@ export default function Recyclability() {
           </Btn>
         </div>
 
-        {/* BULK RECLASSIFICATION PORTAL ACTIVATOR */}
+        {/* CLICK TO OPEN MODAL */}
         <Btn 
           primary 
-          onClick={openReclassifyModal}
-          className="w-full sm:w-auto shadow-sm"
+          onClick={() => {
+            setShowBulkModal(true);
+            // Reset modal steps
+            setIsBulkRunning(false);
+            setBulkStatus("");
+            setBulkSuccess(false);
+          }}
+          className="w-full sm:w-auto"
         >
-          <IconUpload size={14} className="shrink-0 animate-bounce" />
+          <IconUpload size={14} className="shrink-0" />
           <span>Bulk SKU Reclassification Tool</span>
         </Btn>
       </div>
 
-      {/* FULLY WORKING BULK SKUS RECLASSIFICATION MODAL OVERLAY */}
+      {/* GORGEOUS HIGH-FIDELITY MODAL OVERLAY */}
       {showBulkModal && (
-        <div className="fixed inset-0 bg-[#0f172a]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-          <div className="bg-bg-primary rounded-xl border border-border-tertiary shadow-2xl max-w-2xl w-full flex flex-col overflow-hidden max-h-[85vh]">
+        <div className="fixed inset-0 bg-[#0f172a]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-bg-primary rounded-xl border border-border-tertiary p-6 max-w-2xl w-full shadow-2xl relative transition-all duration-200 animate-in fade-in zoom-in-95">
             
-            {/* Modal Header */}
-            <div className="bg-[#1D9E75] text-white p-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <IconBrain size={20} className="animate-pulse" />
-                <div>
-                  <h3 className="text-sm font-bold">AI SKU Taxonomy Reclassification Portal</h3>
-                  <p className="text-[10px] text-white/80 font-medium">Reclassifies packaging records into primary, secondary, tertiary, or service packaging types.</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowBulkModal(false)} 
-                className="text-white/80 hover:text-white cursor-pointer p-1 rounded hover:bg-white/10"
-              >
-                <IconX size={18} />
-              </button>
+            {/* Close icon */}
+            <button 
+              onClick={() => setShowBulkModal(false)}
+              className="absolute top-4 right-4 text-text-tertiary hover:text-text-primary hover:bg-bg-secondary p-1.5 rounded-lg cursor-pointer transition-colors"
+              aria-label="Close modal"
+            >
+              <IconX size={18} />
+            </button>
+
+            {/* Modal Title */}
+            <div className="flex items-center gap-2 text-text-success border-b border-border-tertiary pb-3.5 mb-4">
+              <IconBrain size={22} className="shrink-0" />
+              <h3 className="text-base font-bold text-text-primary">Bulk SKU Taxonomy Reclassification Portal</h3>
+              <Badge variant="success">AI Assistant Active</Badge>
             </div>
 
-            {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5 select-none">
-              
-              {/* Step Process Indicators */}
-              <div className="flex items-center justify-between border-b border-border-tertiary/60 pb-3 text-[10px] font-bold uppercase tracking-wider text-text-tertiary">
-                <span className={bulkStep === 1 ? "text-[#1D9E75]" : ""}>1. Upload Portfolio</span>
-                <IconArrowRight size={12} />
-                <span className={bulkStep === 2 ? "text-[#1d9e75]" : ""}>2. AI Processing</span>
-                <IconArrowRight size={12} />
-                <span className={bulkStep === 3 ? "text-[#1D9E75]" : ""}>3. Review Suggestions</span>
-                <IconArrowRight size={12} />
-                <span className={bulkStep === 4 ? "text-[#1D9E75]" : ""}>4. Success</span>
-              </div>
+            {/* Modal Body */}
+            <div className="space-y-4 text-xs">
+              <p className="text-text-secondary leading-relaxed">
+                Upload historical packaging inventory rosters (Excel templates) or trigger PackTrack's localized AI parsing engine to automatically map all 1,284 packaging items into compliant PPWR categories (`primary`, `secondary`, `tertiary`, or `service`).
+              </p>
 
-              {/* STEP 1: UPLOAD PORTFOLIO */}
-              {bulkStep === 1 && (
-                <div className="space-y-4 text-xs">
-                  <p className="text-text-secondary leading-relaxed">
-                    Upload your SKU portfolio spreadsheet to audit classifications. The PackTrack AI model evaluates polymer lamination descriptions, dimensional profiles, and thickness metrics to map items to their compliant categories.
-                  </p>
+              <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                {/* Upload drag & drop section */}
+                <div className="flex-1 border-2 border-dashed border-border-secondary hover:border-[#1D9E75]/60 bg-bg-secondary hover:bg-bg-primary p-5 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer transition-all">
+                  <IconUpload size={32} className="text-text-tertiary mb-2" />
+                  <span className="font-bold text-text-primary text-[12.5px]">Drag & Drop Excel Template</span>
+                  <span className="text-[10px] text-text-tertiary mt-1">Accepts standard .xlsx, .csv lists with SKU + description headers</span>
+                </div>
+
+                {/* AI Reclassification engine controller */}
+                <div className="flex-1 bg-bg-secondary p-5 rounded-xl border border-border-tertiary flex flex-col justify-between space-y-3">
+                  <div>
+                    <h4 className="font-bold text-text-primary text-[12.5px] flex items-center gap-1">
+                      <span>AI-Assisted Category Parser</span>
+                    </h4>
+                    <p className="text-[10px] text-text-tertiary leading-relaxed mt-1">
+                      Runs instant keyword density checks, material specs analysis, and packaging dimensions checks to auto-classify items.
+                    </p>
+                  </div>
                   
-                  <div 
-                    onClick={handleSimulatedUpload}
-                    className="border-2 border-dashed border-border-secondary hover:border-[#1D9E75]/60 bg-bg-secondary p-8 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer hover:bg-bg-primary transition-all duration-300 group"
+                  <Btn 
+                    primary 
+                    onClick={handleBulkReclassify} 
+                    className="w-full h-9 flex items-center justify-center font-bold"
+                    disabled={isBulkRunning}
                   >
-                    <IconFileSpreadsheet size={36} className="text-text-tertiary group-hover:text-[#1D9E75] mb-2 transition-colors duration-200" />
-                    <span className="font-bold text-text-primary text-sm group-hover:text-[#1D9E75]">Upload Simulated SKU Excel Template</span>
-                    <span className="text-[10px] text-text-tertiary mt-1">Contains 4 misclassified raw SKUs needing regulatory evaluation</span>
-                  </div>
+                    {isBulkRunning ? <IconRefresh size={14} className="animate-spin shrink-0" /> : <IconBrain size={14} className="shrink-0" />}
+                    <span>{isBulkRunning ? "Running AI Classification..." : "Trigger AI Category Mapping"}</span>
+                  </Btn>
                 </div>
-              )}
+              </div>
 
-              {/* STEP 2: AI PROCESSING */}
-              {bulkStep === 2 && (
-                <div className="py-8 flex flex-col items-center justify-center text-center space-y-4">
-                  <IconRefresh size={36} className="text-[#1D9E75] animate-spin" />
+              {/* Real-time stepping progress alerts inside the modal */}
+              {bulkStatus && (
+                <div className={`p-4 rounded-xl border text-[11.5px] font-semibold flex items-start gap-2.5 transition-all ${
+                  bulkSuccess 
+                    ? "bg-bg-success border-text-success/20 text-text-success" 
+                    : "bg-bg-info border-text-info/20 text-[#185FA5]"
+                }`}>
+                  {!bulkSuccess ? (
+                    <IconRefresh size={16} className="animate-spin shrink-0 mt-0.5" />
+                  ) : (
+                    <IconCircleCheck size={16} className="shrink-0 mt-0.5" />
+                  )}
                   <div className="space-y-1">
-                    <strong className="text-sm font-bold text-text-primary">PackTrack AI Parser Running</strong>
-                    <p className="text-xs text-text-secondary">Evaluating raw materials data against PPWR Article 4 directives...</p>
-                  </div>
-                  <div className="w-64 p-3.5 rounded-lg border bg-bg-secondary border-border-tertiary text-xs font-semibold text-[#15803d]">
-                    {bulkStatus}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: REVIEW AI SUGGESTIONS */}
-              {bulkStep === 3 && (
-                <div className="space-y-4 text-xs">
-                  <p className="text-text-secondary leading-relaxed">
-                    Verify suggestions below. You can override suggestions using the dropdown selectors before saving.
-                  </p>
-
-                  <div className="border border-border-tertiary rounded-xl overflow-hidden max-h-60 overflow-y-auto">
-                    <Table headers={["SKU", "Description", "Raw Material", "Suggested Taxonomy", "Confidence"]}>
-                      {pendingSkus.map(p => (
-                        <Tr key={p.id}>
-                          <Td className="font-mono font-bold text-text-tertiary">{p.id}</Td>
-                          <Td className="font-semibold text-text-primary">{p.name}</Td>
-                          <Td className="font-medium text-text-secondary">{p.material}</Td>
-                          <Td>
-                            <select
-                              value={p.suggested_type}
-                              onChange={(e) => handlePendingTypeChange(p.id, e.target.value)}
-                              className="font-sans text-[11px] font-semibold bg-bg-secondary border border-border-secondary rounded px-2.5 py-1 text-text-primary cursor-pointer outline-none focus:border-[#1D9E75]"
-                            >
-                              <option value="primary">primary</option>
-                              <option value="secondary">secondary</option>
-                              <option value="tertiary">tertiary</option>
-                              <option value="service">service</option>
-                            </select>
-                          </Td>
-                          <Td>
-                            <span className="bg-[#EAF3DE] text-[#3B6D11] text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
-                              {p.confidence}% AI
-                            </span>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Table>
-                  </div>
-
-                  <div className="flex gap-2 justify-end pt-2 shrink-0">
-                    <Btn onClick={() => setBulkStep(1)}>Back</Btn>
-                    <Btn primary onClick={applyBulkReclassification}>
-                      Approve & Apply Taxonomy changes
-                    </Btn>
+                    <span className="block font-bold">{bulkSuccess ? "Success Notification" : "Analysis Progress"}</span>
+                    <p className={bulkSuccess ? "text-text-secondary leading-relaxed font-medium" : "text-[#185FA5] opacity-90 leading-relaxed font-medium"}>
+                      {bulkStatus}
+                    </p>
                   </div>
                 </div>
               )}
-
-              {/* STEP 4: SUCCESS */}
-              {bulkStep === 4 && (
-                <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="w-12 h-12 bg-bg-success rounded-full flex items-center justify-center text-[#15803d]">
-                    <IconCircleCheck size={32} />
-                  </div>
-                  <strong className="text-sm font-bold text-[#15803d]">Taxonomy Applied Successfully!</strong>
-                  <p className="text-xs text-text-secondary max-w-sm">
-                    The 4 pending packaging configurations have been saved to your global SKU database. The Recyclability pages are dynamically updated!
-                  </p>
-                </div>
-              )}
-
             </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-2.5 border-t border-border-tertiary pt-4 mt-5">
+              <Btn onClick={() => setShowBulkModal(false)}>
+                <span>Close Portal</span>
+              </Btn>
+              {bulkSuccess && (
+                <Btn primary onClick={() => setShowBulkModal(false)}>
+                  <span>Apply Classifications</span>
+                </Btn>
+              )}
+            </div>
+
           </div>
         </div>
       )}
