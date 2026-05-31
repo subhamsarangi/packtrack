@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import { useCompliance } from "@/components/ComplianceContext";
 import { Card, CardTitle, Grade, Badge, Btn, InfoHelper } from "@/components/ui";
-import { IconQrcode, IconFileDownload, IconShare, IconRecycle, IconBook } from "@tabler/icons-react";
+import { IconQrcode, IconFileDownload, IconShare, IconRecycle, IconBook, IconAlertCircle } from "@tabler/icons-react";
 
 const dpp = {
   id: "PKG-1041-EU-2026",
@@ -25,6 +26,7 @@ const completeness = [
 
 export default function DPP() {
   const [showGuide, setShowGuide] = useState(true);
+  const { actorTypes } = useCompliance();
 
   const downloadDoC = () => {
     const docText = `EUROPEAN UNION DECLARATION OF CONFORMITY (DoC)
@@ -59,6 +61,7 @@ This declaration is issued under the sole responsibility of the manufacturer, co
 
   return (
     <div className="space-y-6">
+      
       {/* QUICK START GUIDE */}
       {showGuide && (
         <div className="bg-[#EAF3DE] border border-[#d2e7b9] rounded-xl p-5 shadow-sm text-text-primary transition-all duration-300">
@@ -98,11 +101,38 @@ This declaration is issued under the sole responsibility of the manufacturer, co
         </div>
       )}
 
+      {/* MICRO-ENTERPRISE WAIVER NOTIFICATION BANNER */}
+      {actorTypes.microEnterprise && (
+        <div className="bg-[#e0f2fe] border border-[#bae6fd] rounded-xl p-5 shadow-sm text-text-primary flex items-start gap-4 transition-all duration-300">
+          <IconAlertCircle size={28} className="text-[#0284c7] shrink-0 mt-0.5" />
+          <div className="space-y-1.5">
+            <h3 className="text-sm font-bold text-[#0284c7]">Digital Product Passport (DPP) Exemption Active</h3>
+            <p className="text-[11.5px] text-text-secondary leading-relaxed">
+              Under <strong>PPWR Article 13 Regulation</strong>, micro-enterprise operators placing packaging on the EU market are exempt from generating consumer-facing Digital Product Passports and declarations of conformity (DoCs). 
+              Your material specifications are logged for base supply chain compliance, but all active public passport generation processes are currently waived.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        
+        {/* PASSPORT DETAILS */}
+        <Card className={`relative overflow-hidden ${actorTypes.microEnterprise ? "opacity-75" : ""}`}>
+          
+          {/* EXEMPT OVERLAY FOR MICRO-ENTERPRISES */}
+          {actorTypes.microEnterprise && (
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex items-center justify-center pointer-events-none select-none z-10">
+              <div className="transform rotate-[-12deg] border-4 border-dashed border-[#0284c7]/40 rounded-xl px-6 py-3 font-mono text-[#0284c7] font-bold text-lg bg-bg-primary/95 shadow-lg uppercase tracking-widest">
+                Exempt — Art. 13 Waiver
+              </div>
+            </div>
+          )}
+
           <CardTitle action={<InfoHelper text="Official EU digital record showing material details, recyclability grade, and manufacturing location." />}>
             Digital Product Passport — PKG-1041
           </CardTitle>
+          
           <div className="text-center py-4">
             <div className="w-[100px] h-[100px] bg-[#E6F1FB] border border-dashed border-[#185FA5] rounded-lg mx-auto flex flex-col items-center justify-center text-[11px] text-[#185FA5] font-semibold leading-normal">
               <IconQrcode size={24} className="mb-1 shrink-0" />
@@ -134,17 +164,27 @@ This declaration is issued under the sole responsibility of the manufacturer, co
           </table>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
-            <Btn primary className="flex-1 w-full sm:w-auto" onClick={downloadDoC}>
+            <Btn 
+              primary 
+              className="flex-1 w-full sm:w-auto" 
+              onClick={downloadDoC}
+              disabled={actorTypes.microEnterprise}
+            >
               <IconFileDownload size={14} className="shrink-0" />
               <span>Download DoC</span>
             </Btn>
-            <Btn className="flex-1 w-full sm:w-auto" onClick={shareDPP}>
+            <Btn 
+              className="flex-1 w-full sm:w-auto" 
+              onClick={shareDPP}
+              disabled={actorTypes.microEnterprise}
+            >
               <IconShare size={14} className="shrink-0" />
               <span>Share DPP link</span>
             </Btn>
           </div>
         </Card>
 
+        {/* RECYCLING LABEL & COMPLETENESS */}
         <div className="space-y-6">
           <Card>
             <CardTitle action={<InfoHelper text="Standardized recycling label designed to guide end consumers on proper disposal streams." />}>
@@ -158,7 +198,7 @@ This declaration is issued under the sole responsibility of the manufacturer, co
             </div>
           </Card>
 
-          <Card>
+          <Card className={actorTypes.microEnterprise ? "opacity-75" : ""}>
             <CardTitle action={<InfoHelper text="Verifies if all required chemical, carbon, material, and safety files are uploaded and certified." />}>
               Data completeness
             </CardTitle>
@@ -166,12 +206,15 @@ This declaration is issued under the sole responsibility of the manufacturer, co
               {completeness.map((c, i) => (
                 <div key={i} className="flex justify-between items-center text-[13px] border-b border-border-tertiary/40 pb-2.5 last:border-0 last:pb-0">
                   <span className="text-text-secondary font-medium">{c.label}</span>
-                  <Badge variant={c.status === "Complete" ? "success" : "warning"}>{c.status}</Badge>
+                  <Badge variant={actorTypes.microEnterprise ? "success" : c.status === "Complete" ? "success" : "warning"}>
+                    {actorTypes.microEnterprise ? "Exempt / N/A" : c.status}
+                  </Badge>
                 </div>
               ))}
             </div>
           </Card>
         </div>
+
       </div>
     </div>
   );

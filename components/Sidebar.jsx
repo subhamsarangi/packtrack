@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 import {
   IconLeaf, IconLayoutDashboard, IconRecycle, IconRoute,
   IconId, IconBuildingFactory2, IconFileCertificate, IconScale,
-  IconX,
+  IconX, IconGlobe, IconBuildingStore
 } from "@tabler/icons-react";
+import { useCompliance } from "@/components/ComplianceContext";
 
 const nav = [
   { section: "Overview" },
@@ -16,12 +17,15 @@ const nav = [
   { href: "/dpp", label: "Digital Product Passport", icon: IconId },
   { section: "Operations" },
   { href: "/suppliers", label: "Suppliers", icon: IconBuildingFactory2 },
+  { href: "/epr", label: "EPR Exporter Hub", icon: IconGlobe },
+  { href: "/retailer", label: "Retailer & Dist. Hub", icon: IconBuildingStore },
   { href: "/reporting", label: "Reporting", icon: IconFileCertificate },
   { href: "/regulations", label: "Regulation Monitor", icon: IconScale },
 ];
 
 export default function Sidebar({ onClose }) {
   const path = usePathname();
+  const { actorTypes } = useCompliance();
   
   return (
     <aside className="w-60 shrink-0 bg-bg-primary border-r border-border-tertiary flex flex-col py-6 h-full overflow-y-auto shadow-xl md:shadow-none">
@@ -42,7 +46,7 @@ export default function Sidebar({ onClose }) {
         </button>
       </div>
       
-      <nav className="flex flex-col gap-0.5" aria-label="Sidebar Navigation">
+      <nav className="flex-1 flex flex-col gap-0.5" aria-label="Sidebar Navigation">
         {nav.map((item, i) =>
           item.section ? (
             <div key={i} className="px-6 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">
@@ -65,6 +69,19 @@ export default function Sidebar({ onClose }) {
           )
         )}
       </nav>
+
+      {/* Active Scope Display */}
+      <div className="mt-auto px-6 pt-4 border-t border-border-tertiary">
+        <div className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary mb-2">Scope Settings</div>
+        <div className="flex flex-wrap gap-1">
+          {actorTypes.manufacturer && <span className="text-[9.5px] font-semibold bg-[#EAF3DE] text-[#3B6D11] px-2 py-0.5 rounded-[4px]">Mfg</span>}
+          {actorTypes.importer && <span className="text-[9.5px] font-semibold bg-[#E6F1FB] text-[#185FA5] px-2 py-0.5 rounded-[4px]">Importer</span>}
+          {actorTypes.distributor && <span className="text-[9.5px] font-semibold bg-[#FAEEDA] text-[#854F0B] px-2 py-0.5 rounded-[4px]">Distributor</span>}
+          {actorTypes.retailer && <span className="text-[9.5px] font-semibold bg-[#FAECE7] text-[#993C1D] px-2 py-0.5 rounded-[4px]">Retailer</span>}
+          {actorTypes.exporter && <span className="text-[9.5px] font-semibold bg-[#FCEBEB] text-[#A32D2D] px-2 py-0.5 rounded-[4px]">Exporter</span>}
+          {actorTypes.microEnterprise && <span className="text-[9.5px] font-semibold bg-[#e0f2fe] text-[#0284c7] px-2 py-0.5 rounded-[4px] border border-[#bae6fd]">Micro</span>}
+        </div>
+      </div>
     </aside>
   );
 }
