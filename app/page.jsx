@@ -172,9 +172,9 @@ export default function Dashboard() {
                   <button
                     key={role.key}
                     onClick={() => toggleActorType(role.key)}
-                    className={`text-left p-3 rounded-xl border transition-all duration-300 cursor-pointer shadow-xs active:scale-[0.98] ${
+                    className={`text-left p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer shadow-xs active:scale-[0.98] ${
                       isActive 
-                        ? `${role.activeColor} shadow-md border-2 translate-y-[-1px]` 
+                        ? `${role.activeColor} shadow-md translate-y-[-1px]` 
                         : "border-border-tertiary bg-bg-secondary hover:bg-bg-primary text-text-secondary hover:text-text-primary"
                     }`}
                   >
@@ -236,7 +236,7 @@ export default function Dashboard() {
               const Icon = node.icon;
               const isFirst = index === 0;
               
-              let borderClass = "border-border-tertiary bg-bg-secondary text-text-secondary opacity-40";
+              let borderClass = "border-2 border-border-tertiary bg-bg-secondary text-text-secondary opacity-40";
               let animationClass = "";
               let badgeText = "Inactive";
               let badgeStyle = "default";

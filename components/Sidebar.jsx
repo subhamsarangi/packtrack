@@ -64,7 +64,7 @@ export default function Sidebar({ onClose }) {
               }`}
             >
               <item.icon size={18} className="shrink-0" />
-              <span>{item.label}</span>
+              <span className="truncate whitespace-nowrap">{item.label}</span>
             </Link>
           )
         )}
