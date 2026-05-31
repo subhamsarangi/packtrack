@@ -250,15 +250,15 @@ export default function Traceability() {
 
       {/* SKU CONTROLS SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-bg-primary p-4 rounded-xl border border-border-tertiary">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-text-secondary uppercase">Select packaging item:</label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 w-full">
+          <label className="text-xs font-bold text-text-secondary uppercase shrink-0">Select packaging item:</label>
           <select 
             value={selectedSkuId}
             onChange={(e) => {
               setSelectedSkuId(e.target.value);
               setSelectedNodeIndex(null); // Reset node selection
             }}
-            className="font-sans text-[13px] px-3 py-1.5 rounded-[6px] border border-border-secondary bg-bg-primary text-text-primary outline-none transition-colors duration-200 focus:border-text-info cursor-pointer font-bold min-w-[200px]"
+            className="font-sans text-[13px] px-3 py-1.5 rounded-[6px] border border-border-secondary bg-bg-primary text-text-primary outline-none transition-colors duration-200 focus:border-text-info cursor-pointer font-bold w-full sm:w-auto min-w-[200px]"
             aria-label="Select packaging SKU for traceability"
           >
             {skus.map(s => (
@@ -296,14 +296,14 @@ export default function Traceability() {
           Click any step node in the custody pipeline below to pull its verified processing facility parameters, ISO certs, and transaction hashes directly from the custody spine.
         </p>
 
-        <div className="flex flex-wrap items-center gap-2.5 py-4 overflow-x-auto select-none">
+        <div className="flex flex-row items-center gap-2.5 py-4 overflow-x-auto select-none pb-5">
           {pathway.map((n, i) => {
             const isNodeSelected = selectedNodeIndex === i;
             return (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => setSelectedNodeIndex(isNodeSelected ? null : i)}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer active:scale-95 border-2 ${
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer active:scale-95 border-2 shrink-0 ${
                     isNodeSelected 
                       ? "border-[#3B6D11] scale-[1.04] ring-2 ring-[#EAF3DE]" 
                       : "border-transparent hover:scale-[1.02]"
@@ -313,7 +313,7 @@ export default function Traceability() {
                   <span>{n.label}</span>
                 </button>
                 {i < pathway.length - 1 && (
-                  <IconArrowRight size={14} className="text-text-tertiary" />
+                  <IconArrowRight size={14} className="text-text-tertiary shrink-0" />
                 )}
               </div>
             );
@@ -403,9 +403,9 @@ export default function Traceability() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <Btn primary small type="submit">Append to Blockchain</Btn>
-                <Btn small onClick={() => setShowEventForm(false)}>Cancel</Btn>
+              <div className="flex flex-wrap gap-2">
+                <Btn primary small type="submit" className="w-full sm:w-auto">Append to Blockchain</Btn>
+                <Btn small onClick={() => setShowEventForm(false)} className="w-full sm:w-auto">Cancel</Btn>
               </div>
             </form>
           )}
@@ -444,15 +444,15 @@ export default function Traceability() {
               { id: "tier3", label: "Tier 3 raw raw polymer & sand suppliers (Chemical extraction)", value: tierCoverages.tier3 },
               { id: "eol", label: "End-of-life recycled stream tracing (Sorting centers)", value: tierCoverages.eol },
             ].map((c, i) => (
-              <div key={i} className="space-y-1.5 p-3 rounded-xl border border-border-tertiary bg-bg-secondary/40 hover:bg-bg-secondary hover:border-border-secondary transition-all duration-200">
-                <div className="flex justify-between items-center text-[13px]">
-                  <span className="text-text-secondary font-bold truncate pr-2">{c.label}</span>
-                  <div className="flex items-center gap-2 shrink-0">
+              <div key={i} className="space-y-2 p-3 rounded-xl border border-border-tertiary bg-bg-secondary/40 hover:bg-bg-secondary hover:border-border-secondary transition-all duration-200">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-[13px]">
+                  <span className="text-text-secondary font-bold leading-tight">{c.label}</span>
+                  <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
                     <span className="text-text-primary font-bold">{c.value}%</span>
                     <button
                       type="button"
                       onClick={() => setSelectedTierAuditDetails(c)}
-                      className="text-[10px] font-bold text-[#185FA5] hover:text-[#378ADD] bg-bg-info/60 hover:bg-bg-info border border-transparent hover:border-[#bae6fd] px-2 py-0.5 rounded-[4px] cursor-pointer transition-all active:scale-95"
+                      className="text-[10px] font-bold text-[#185FA5] hover:text-[#378ADD] bg-bg-info/60 hover:bg-bg-info border border-transparent hover:border-[#bae6fd] px-2 py-1 rounded-[4px] cursor-pointer transition-all active:scale-95"
                     >
                       Audit Report ↗
                     </button>

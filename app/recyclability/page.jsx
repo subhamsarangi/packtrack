@@ -305,11 +305,11 @@ export default function Recyclability() {
       {/* SKU DATA TABLE */}
       <Card>
         <CardTitle action={
-          <div className="hidden md:flex items-center gap-3 text-xs font-normal text-text-secondary select-none">
-            <span className="flex items-center gap-1.5"><Badge variant="default">Primary</Badge> Direct product contact</span>
-            <span className="flex items-center gap-1.5"><Badge variant="info">Secondary</Badge> Multipacks/sleeves</span>
-            <span className="flex items-center gap-1.5"><Badge variant="warning">Tertiary</Badge> Transport wrap/straps</span>
-            <span className="flex items-center gap-1.5"><Badge variant="danger">Service</Badge> POS cups/bags</span>
+          <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs font-normal text-text-secondary select-none mt-1.5 sm:mt-0">
+            <span className="flex items-center gap-1"><Badge variant="default">Primary</Badge> Direct</span>
+            <span className="flex items-center gap-1"><Badge variant="info">Secondary</Badge> Outer</span>
+            <span className="flex items-center gap-1"><Badge variant="warning">Tertiary</Badge> Logistics</span>
+            <span className="flex items-center gap-1"><Badge variant="danger">Service</Badge> POS</span>
           </div>
         }>
           Recyclability & Packaging Taxonomy by SKU <span className="text-[11px] text-text-tertiary font-normal lowercase ml-2">(click row to view AI Remediation & Packaging Hierarchy)</span>
@@ -350,9 +350,9 @@ export default function Recyclability() {
                       onClick={() => toggleRow(s.id, s.parentSkuId)}
                       className="hover:bg-bg-secondary transition-colors duration-150 cursor-pointer"
                     >
-                      <Td className="font-mono text-xs text-text-tertiary font-semibold">{s.id}</Td>
-                      <Td className="font-semibold text-text-primary">{s.name}</Td>
-                      <Td>
+                      <Td className="font-mono text-xs text-text-tertiary font-semibold min-w-[80px]">{s.id}</Td>
+                      <Td className="font-semibold text-text-primary min-w-[170px]">{s.name}</Td>
+                      <Td className="min-w-[100px]">
                         <Badge 
                           variant={
                             s.packaging_type === "primary" ? "default" :
@@ -363,9 +363,9 @@ export default function Recyclability() {
                           {s.packaging_type}
                         </Badge>
                       </Td>
-                      <Td className="text-text-secondary font-medium">{s.material}</Td>
-                      <Td><Grade grade={s.grade} /></Td>
-                      <Td>
+                      <Td className="text-text-secondary font-medium min-w-[100px]">{s.material}</Td>
+                      <Td className="min-w-[50px]"><Grade grade={s.grade} /></Td>
+                      <Td className="min-w-[110px]">
                         <ProgressBar value={s.recycled} />
                       </Td>
                       <Td>
@@ -400,8 +400,8 @@ export default function Recyclability() {
                                   Under PPWR auditing rules, you must report configurations at the complete packaging system level. Link this item to its next outer packaging layers.
                                 </p>
                                 
-                                <div className="flex items-center gap-3 bg-bg-secondary p-3 rounded-lg border border-border-tertiary/40">
-                                  <div className="space-y-1 flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-bg-secondary p-3 rounded-lg border border-border-tertiary/40">
+                                  <div className="space-y-1 flex-1 w-full">
                                     <label className="text-[10px] font-bold text-text-secondary block">Select Parent Packaging SKU:</label>
                                     <select
                                       value={tempParentId}
@@ -430,7 +430,7 @@ export default function Recyclability() {
                                       updateSkuLink(s.id, tempParentId);
                                       alert(`Linkage updated: ${s.id} is now parented under ${tempParentId || "None"}.`);
                                     }}
-                                    className="self-end h-[32px]"
+                                    className="w-full sm:w-auto sm:self-end h-[32px]"
                                   >
                                     Save Link
                                   </Btn>
